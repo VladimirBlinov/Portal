@@ -1,0 +1,6 @@
+CREATE USER admin WITH PASSWORD 'admin';
+
+CREATE DATABASE invportal;
+
+GRANT ALL PRIVILEGES ON DATABASE invportal TO admin;
+
