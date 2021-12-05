@@ -10,7 +10,7 @@ RUN apt-get update \
     && pip install psycopg2
 RUN pip install --upgrade pi
 RUN pip install -r requirements.txt
-RUN chmod +x entrypoint.sh
+RUN chmod -x entrypoint.sh
 
 COPY . .
 
