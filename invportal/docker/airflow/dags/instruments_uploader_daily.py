@@ -35,7 +35,7 @@ with DAG(
         logging.info(EXTRACTED_FILE_PATH)
         instruments = get_instruments()
         logging.info(EXTRACTED_FILE_PATH)
-        instruments.to_csv(EXTRACTED_FILE_PATH, index_label=False, header=False, sep=';')
+        instruments.to_csv(EXTRACTED_FILE_PATH, index_label=False, header=False, sep=';', mode='w')
 
 
     extract_task = PythonOperator(
@@ -55,8 +55,8 @@ with DAG(
                                 FROM public."Instrument";""")
                     for row in cursor:
                         reference_df = reference_df.append(pd.Series(row), ignore_index=True)
-                    transformed_df = compare_df(reference_df.iloc[3:, :], extracted_df)
-                    transformed_df.to_csv(TRANSFORMED_FILE_PATH, index_label=False, header=False, sep=';')
+                    transformed_df = compare_df(reference_df, extracted_df)
+                    transformed_df.to_csv(TRANSFORMED_FILE_PATH, index_label=False, header=False, sep=';', mode='w')
                 except Exception as e:
                     logging.info('Exception:', e)
 
@@ -69,7 +69,7 @@ with DAG(
     load_task = PostgresOperator(
         task_id='load_task',
         postgres_conn_id='airflow_database',
-        sql=f"""COPY public."Instrument" FROM '{EXTRACTED_FILE_PATH}' DELIMITER ';'
+        sql=f"""COPY public."Instrument" FROM '{TRANSFORMED_FILE_PATH}' DELIMITER ';'
             """
     )
 
