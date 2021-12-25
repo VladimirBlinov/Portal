@@ -76,8 +76,10 @@ with DAG(
     load_task = PostgresOperator(
         task_id='load_task',
         postgres_conn_id='airflow_database',
-        sql=f"""COPY public."Instrument" FROM '{TRANSFORMED_FILE_PATH}' DELIMITER ';'
-            """
+        sql="sql/load_instruments.sql",
+        # sql=f"""COPY public."Instrument" FROM '{TRANSFORMED_FILE_PATH}' DELIMITER ';'
+        #     """,
+        params={"path": TRANSFORMED_FILE_PATH}
     )
 
     extract_task >> transform_task >> load_task
