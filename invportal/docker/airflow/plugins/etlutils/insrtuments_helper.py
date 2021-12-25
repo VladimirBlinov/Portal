@@ -71,10 +71,14 @@ if __name__ == '__main__':
     extracted_df = get_extracted(file)
     # reference_df = get_df_from_db(query)
     reference_df = pd.DataFrame()
+    transformed_df = pd.DataFrame()
     cursor = connect_db(query)
     for row in cursor:
         reference_df = reference_df.append(pd.Series(row), ignore_index=True)
-    transformed_df = compare_df(reference_df, extracted_df)
+    if not reference_df.empty:
+        transformed_df = compare_df(reference_df, extracted_df)
+    else:
+        transformed_df = extracted_df
     print(transformed_df)
 
 

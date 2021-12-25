@@ -32,11 +32,9 @@ with DAG(
         catchup=False,
         tags=[TAG]) as dag:
     def extract():
-        logging.info(EXTRACTED_FILE_PATH)
         instruments = get_instruments()
         logging.info(EXTRACTED_FILE_PATH)
         instruments.to_csv(EXTRACTED_FILE_PATH, index_label=False, header=False, sep=';', mode='w')
-
 
 
     extract_task = PythonOperator(
@@ -48,6 +46,7 @@ with DAG(
     def transform():
         pg_hook = PostgresHook('airflow_database')
         reference_df = pd.DataFrame()
+        transformed_df = pd.DataFrame()
         extracted_df = get_extracted(EXTRACTED_FILE_PATH)
         with pg_hook.get_conn() as conn:
             with conn.cursor() as cursor:
@@ -56,8 +55,12 @@ with DAG(
                                 FROM public."Instrument";""")
                     for row in cursor:
                         reference_df = reference_df.append(pd.Series(row), ignore_index=True)
-                    transformed_df = compare_df(reference_df, extracted_df)
+                    if not reference_df.empty:
+                        transformed_df = compare_df(reference_df, extracted_df)
+                    else:
+                        transformed_df = extracted_df
                     logging.info(TRANSFORMED_FILE_PATH)
+                    logging.info(transformed_df)
                     transformed_df.to_csv(TRANSFORMED_FILE_PATH, index_label=False, header=False, sep=';', mode='w')
                 except Exception as e:
                     logging.info('Exception:', e)
