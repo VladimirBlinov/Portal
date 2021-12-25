@@ -79,6 +79,8 @@ if __name__ == '__main__':
         transformed_df = compare_df(reference_df, extracted_df)
     else:
         transformed_df = extracted_df
+    transformed_df.index = transformed_df.iloc[:, 0]
+    transformed_df = transformed_df.drop([0], axis=1)
     print(transformed_df)
 
 

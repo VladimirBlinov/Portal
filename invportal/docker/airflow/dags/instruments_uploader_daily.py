@@ -59,6 +59,8 @@ with DAG(
                         transformed_df = compare_df(reference_df, extracted_df)
                     else:
                         transformed_df = extracted_df
+                    transformed_df.index = transformed_df.iloc[:, 0]
+                    transformed_df = transformed_df.drop([0], axis=1)
                     logging.info(TRANSFORMED_FILE_PATH)
                     logging.info(transformed_df)
                     transformed_df.to_csv(TRANSFORMED_FILE_PATH, index_label=False, header=False, sep=';', mode='w')
