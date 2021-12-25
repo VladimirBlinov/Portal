@@ -61,6 +61,7 @@ def compare_df(ref_df, new_df):
     set_new = set(new_df.iloc[:, 2])
     set_diff = set_new - set_ref
     diff_df = new_df[new_df.iloc[:, 2].isin(set_diff)]
+    logging.info(f'{diff_df}')
     return diff_df
 
 
