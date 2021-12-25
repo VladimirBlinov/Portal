@@ -38,6 +38,7 @@ with DAG(
         instruments.to_csv(EXTRACTED_FILE_PATH, index_label=False, header=False, sep=';', mode='w')
 
 
+
     extract_task = PythonOperator(
         task_id='extract_task',
         python_callable=extract,
@@ -56,6 +57,7 @@ with DAG(
                     for row in cursor:
                         reference_df = reference_df.append(pd.Series(row), ignore_index=True)
                     transformed_df = compare_df(reference_df, extracted_df)
+                    logging.info(TRANSFORMED_FILE_PATH)
                     transformed_df.to_csv(TRANSFORMED_FILE_PATH, index_label=False, header=False, sep=';', mode='w')
                 except Exception as e:
                     logging.info('Exception:', e)
