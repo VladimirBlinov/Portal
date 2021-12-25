@@ -57,7 +57,6 @@ def get_extracted(file_path):
 
 
 def compare_df(ref_df, new_df):
-    new_df.columns = ref_df.columns.to_list()
     set_ref = set(ref_df.iloc[:, 2])
     set_new = set(new_df.iloc[:, 2])
     set_diff = set_new - set_ref
@@ -74,7 +73,7 @@ if __name__ == '__main__':
     cursor = connect_db(query)
     for row in cursor:
         reference_df = reference_df.append(pd.Series(row), ignore_index=True)
-    transformed_df = compare_df(reference_df.iloc[3:, :], extracted_df)
+    transformed_df = compare_df(reference_df, extracted_df)
     print(transformed_df)
 
 
