@@ -1,3 +1,19 @@
+from finam import Exporter, Market, LookupComparator, Timeframe
+import logging
+import os
+import psycopg2
+from dotenv import load_dotenv
+import pandas as pd
+
+load_dotenv(r'D:\Django\portal\invportal\docker\airflow\database.env')
+
+POSTGRES_USER = os.getenv('POSTGRES_USER')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+POSTGRES_DB = os.getenv('POSTGRES_DB')
+LOCAL_POSTGRES_HOST = os.getenv('LOCAL_POSTGRES_HOST')
+LOCAL_POSTGRES_PORT = os.getenv('LOCAL_POSTGRES_PORT')
+
+
 def get_instruments(market=25):
     exporter = Exporter()
     market_instruments = exporter.lookup(market=market)
@@ -54,3 +70,17 @@ def compare_df(ref_df, new_df):
     logging.info(f'{diff_df}')
     return diff_df
 
+
+if __name__ == '__main__':
+
+    exporter = Exporter()
+    sql = """SELECT "InstrumentID", "Instrument", "Ticker", "MarketplaceID" FROM public."Instrument";"""
+    cursor = connect_db(sql)
+    for row in cursor:
+        instrument_id = row[0]
+        ticker = row[2]
+        marketplace = row[3]
+        # ticker_lookup = exporter.lookup(market=marketplace, code=ticker, name_comparator=LookupComparator.CONTAINS)
+        ticker_data = exporter.download(instrument_id, market=marketplace, start_date=start_date,
+                                        end_date=end_date, timeframe=Timeframe.HOURLY)
+        logging.info(ticker_data)
