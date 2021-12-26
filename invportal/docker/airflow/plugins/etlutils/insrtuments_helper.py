@@ -1,44 +1,12 @@
+from finam import Exporter, Market, LookupComparator, Timeframe
+import pandas as pd
+import logging
+
+
 def get_instruments(market=25):
     exporter = Exporter()
     market_instruments = exporter.lookup(market=market)
     return market_instruments
-
-
-def connect_db(query, dbname=POSTGRES_DB, user_name=POSTGRES_USER, pwd=POSTGRES_PASSWORD, host=LOCAL_POSTGRES_HOST,
-               port=LOCAL_POSTGRES_PORT):
-    conn = psycopg2.connect(dbname=dbname, user=user_name,
-                            password=pwd, host=host, port=port)
-    cursor = conn.cursor()
-    try:
-        cursor.execute(query)
-        return cursor
-    except Exception as e:
-        print('Exception:', e)
-        cursor.close()
-        conn.close()
-
-
-def get_df_from_db(query, dbname=POSTGRES_DB, user_name=POSTGRES_USER, pwd=POSTGRES_PASSWORD,
-                   host=LOCAL_POSTGRES_HOST, port=LOCAL_POSTGRES_PORT):
-    conn = psycopg2.connect(dbname=dbname, user=user_name,
-                            password=pwd, host=host, port=port)
-    try:
-        df = pd.read_sql(query, con=conn)
-        return df
-    except Exception as e:
-        print('Exception:', e)
-        conn.close()
-
-
-def get_df_pg_hook(query, conn_id='airflow_database'):
-    pg_hook = PostgresHook(conn_id)
-    conn = pg_hook.get_conn()
-    try:
-        df = pd.read_sql(query, con=conn)
-        return df
-    except Exception as e:
-        print('Exception:', e)
-        conn.close()
 
 
 def get_extracted(file_path):
