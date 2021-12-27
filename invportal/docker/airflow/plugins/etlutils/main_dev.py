@@ -4,6 +4,8 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 import pandas as pd
+import datetime
+from datetime import timedelta
 
 load_dotenv(r'D:\Django\portal\invportal\docker\airflow\database.env')
 
@@ -46,17 +48,6 @@ def get_df_from_db(query, dbname=POSTGRES_DB, user_name=POSTGRES_USER, pwd=POSTG
         conn.close()
 
 
-def get_df_pg_hook(query, conn_id='airflow_database'):
-    pg_hook = PostgresHook(conn_id)
-    conn = pg_hook.get_conn()
-    try:
-        df = pd.read_sql(query, con=conn)
-        return df
-    except Exception as e:
-        print('Exception:', e)
-        conn.close()
-
-
 def get_extracted(file_path):
     df = pd.read_csv(file_path, sep=';', header=None)
     return df
@@ -71,16 +62,30 @@ def compare_df(ref_df, new_df):
     return diff_df
 
 
-if __name__ == '__main__':
+def get_hourly_data(row, target_file):
+    instrument_id = row[0]
+    marketplace = row[3]
+    exporter = Exporter()
+    ticker_data = exporter.download(instrument_id, market=Market.USA, start_date=start_time,
+                                    end_date=start_time, timeframe=Timeframe.DAILY)
+    if not ticker_data.empty:
+        date_time = ticker_data.iloc[0, 0]
+        open = ticker_data.iloc[0, 2]
+        high = ticker_data.iloc[0, 3]
+        low = ticker_data.iloc[0, 4]
+        close = ticker_data.iloc[0, 5]
+        volume = ticker_data.iloc[0, 6]
+        return(instrument_id, open, high, low, close, volume, date_time, TIMEFRAME_ID, marketplace)
 
+
+if __name__ == '__main__':
+    TIMEFRAME_ID = 7
+    start_time = datetime.datetime.now().date() - timedelta(days=1)
     exporter = Exporter()
     sql = """SELECT "InstrumentID", "Instrument", "Ticker", "MarketplaceID" FROM public."Instrument";"""
     cursor = connect_db(sql)
     for row in cursor:
-        instrument_id = row[0]
-        ticker = row[2]
-        marketplace = row[3]
-        # ticker_lookup = exporter.lookup(market=marketplace, code=ticker, name_comparator=LookupComparator.CONTAINS)
-        ticker_data = exporter.download(instrument_id, market=marketplace, start_date=start_date,
-                                        end_date=end_date, timeframe=Timeframe.HOURLY)
-        logging.info(ticker_data)
+        try:
+            get_hourly_data(row, start_time)
+        except Exception as e:
+            logging.info('Exception:', e)

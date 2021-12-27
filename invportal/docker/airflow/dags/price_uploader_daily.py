@@ -1,51 +1,55 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import os
 import pandas as pd
+from finam import Exporter, Market, Timeframe
 
 from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.python import PythonOperator
 from airflow.hooks.postgres_hook import PostgresHook
 
-from etlutils.insrtuments_helper import get_instruments, get_extracted, compare_df
+from etlutils.insrtuments_helper import get_hourly_data
 
 DEFAULT_ARGS = {
     'owner': 'airflow',
-    'start_date': datetime(2021, 12, 15),
 }
 
-DAG_ID = 'price_uploader_hourly_dag'
-TAG = 'price_uploader_hourly'
+DAG_ID = 'price_uploader_daily_dag'
+TAG = 'price_uploader_daily'
 TEMP_DIR = '/tmp'
 WORK_DIR = os.path.join(TEMP_DIR, DAG_ID)
 if not os.path.exists(WORK_DIR):
     os.mkdir(WORK_DIR)
 EXTRACTED_FILE_PATH = os.path.join(WORK_DIR, f'extracted_{DAG_ID}.csv')
 TRANSFORMED_FILE_PATH = os.path.join(WORK_DIR, f'transformed_{DAG_ID}.csv')
-TIMEFRAME_ID = 6
+TIMEFRAME_ID = 7
 
 with DAG(
         DAG_ID,
         default_args=DEFAULT_ARGS,
-        schedule_interval='@hourly',
+        schedule_interval='@daily',
         start_date=datetime(2021, 12, 24),
         catchup=False,
         tags=[TAG]) as dag:
 
     def extract():
+        start_time = datetime.now().date() - timedelta(days=1)
         pg_hook = PostgresHook('airflow_database')
+        sql = """SELECT "InstrumentID", "Instrument", "Ticker", "MarketplaceID" FROM public."Instrument";"""
         with pg_hook.get_conn() as conn:
             with conn.cursor() as cursor:
                 try:
-                    cursor.execute("sql/get_instruments.sql")
+                    cursor.execute(sql)
                 except Exception as e:
                     logging.info('Exception:', e)
         if cursor.rowcount > 0:
             for row in cursor:
-                instrument_id = row[0]
-                ticker = row[2]
-                marketplace = row[3]
+                try:
+                    get_hourly_data(row, start_time)
+                except Exception as e:
+                    logging.info('Exception:', e)
+
 
     extract_task = PythonOperator(
         task_id='extract_task',

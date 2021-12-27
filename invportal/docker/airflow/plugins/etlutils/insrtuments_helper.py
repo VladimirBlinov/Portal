@@ -22,3 +22,19 @@ def compare_df(ref_df, new_df):
     logging.info(f'{diff_df}')
     return diff_df
 
+
+def get_hourly_data(row, start_time, target_file):
+    TIMEFRAME_ID = 7
+    instrument_id = row[0]
+    marketplace = row[3]
+    exporter = Exporter()
+    ticker_data = exporter.download(instrument_id, market=Market.USA, start_date=start_time,
+                                    end_date=start_time, timeframe=Timeframe.DAILY)
+    if not ticker_data.empty:
+        date_time = ticker_data.iloc[0, 0]
+        open = ticker_data.iloc[0, 2]
+        high = ticker_data.iloc[0, 3]
+        low = ticker_data.iloc[0, 4]
+        close = ticker_data.iloc[0, 5]
+        volume = ticker_data.iloc[0, 6]
+        return instrument_id, open, high, low, close, volume, date_time, TIMEFRAME_ID, marketplace
