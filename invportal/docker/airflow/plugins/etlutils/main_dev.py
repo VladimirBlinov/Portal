@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import datetime
 from datetime import timedelta
+from csv import writer
 
 load_dotenv(r'D:\Django\portal\invportal\docker\airflow\database.env')
 
@@ -62,12 +63,12 @@ def compare_df(ref_df, new_df):
     return diff_df
 
 
-def get_hourly_data(row, target_file):
+def get_daily_data(row, start_time, end_time):
     instrument_id = row[0]
     marketplace = row[3]
     exporter = Exporter()
     ticker_data = exporter.download(instrument_id, market=Market.USA, start_date=start_time,
-                                    end_date=start_time, timeframe=Timeframe.DAILY)
+                                    end_date=end_time, timeframe=Timeframe.DAILY)
     if not ticker_data.empty:
         date_time = ticker_data.iloc[0, 0]
         open = ticker_data.iloc[0, 2]
@@ -75,17 +76,29 @@ def get_hourly_data(row, target_file):
         low = ticker_data.iloc[0, 4]
         close = ticker_data.iloc[0, 5]
         volume = ticker_data.iloc[0, 6]
-        return(instrument_id, open, high, low, close, volume, date_time, TIMEFRAME_ID, marketplace)
+        return [instrument_id, open, high, low, close, volume, date_time, TIMEFRAME_ID, marketplace]
+
+
+def list_to_csv_as_row(file_name, list_of_elem):
+    # Open file in append mode
+    with open(file_name, 'a+', newline='') as write_obj:
+        # Create a writer object from csv module
+        csv_writer = writer(write_obj)
+        # Add contents of list as last row in the csv file
+        csv_writer.writerow(list_of_elem)
 
 
 if __name__ == '__main__':
     TIMEFRAME_ID = 7
     start_time = datetime.datetime.now().date() - timedelta(days=1)
+    end_time = start_time + timedelta(days=1)
+    print(start_time, end_time)
     exporter = Exporter()
     sql = """SELECT "InstrumentID", "Instrument", "Ticker", "MarketplaceID" FROM public."Instrument";"""
     cursor = connect_db(sql)
     for row in cursor:
         try:
-            get_hourly_data(row, start_time)
+            instrument_data = get_daily_data(row, start_time, end_time)
+            print(instrument_data)
         except Exception as e:
             logging.info('Exception:', e)
