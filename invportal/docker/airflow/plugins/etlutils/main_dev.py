@@ -64,11 +64,17 @@ def compare_df(ref_df, new_df):
 
 
 def get_daily_data(row, start_time, end_time):
+    TIMEFRAME_ID = 7
+    ticker_data = pd.DataFrame()
     instrument_id = row[0]
     marketplace = row[3]
     exporter = Exporter()
-    ticker_data = exporter.download(instrument_id, market=Market.USA, start_date=start_time,
-                                    end_date=end_time, timeframe=Timeframe.DAILY)
+    try:
+        ticker_data = exporter.download(instrument_id, market=Market.USA, start_date=start_time,
+                                        end_date=end_time, timeframe=Timeframe.DAILY)
+    except Exception as e:
+        logging.info('Exception:', e)
+
     if not ticker_data.empty:
         date_time = ticker_data.iloc[0, 0]
         open = ticker_data.iloc[0, 2]
@@ -76,7 +82,7 @@ def get_daily_data(row, start_time, end_time):
         low = ticker_data.iloc[0, 4]
         close = ticker_data.iloc[0, 5]
         volume = ticker_data.iloc[0, 6]
-        return [instrument_id, open, high, low, close, volume, date_time, TIMEFRAME_ID, marketplace]
+        return instrument_id, open, high, low, close, volume, date_time, TIMEFRAME_ID, marketplace
 
 
 def list_to_csv_as_row(file_name, list_of_elem):
