@@ -44,6 +44,8 @@ def get_daily_data(row, start_time, end_time):
         close = ticker_data.iloc[0, 5]
         volume = ticker_data.iloc[0, 6]
         return instrument_id, open, high, low, close, volume, date_time, TIMEFRAME_ID, marketplace
+    else:
+        return None
 
 
 def list_to_csv_as_row(file_name, list_of_elem):

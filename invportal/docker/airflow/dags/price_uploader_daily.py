@@ -36,7 +36,6 @@ with DAG(
         logging.info(f'{kwargs}')
         execution_date = kwargs['data_interval_start']
         logging.info(f'execution_date: {execution_date}')
-        # execution_date = datetime.strptime(execution_date, DATE_FORMAT)
         logging.info(f'execution_date: {execution_date.strftime(DATE_FORMAT)}')
         extracted_file_path = os.path.join(WORK_DIR, f'extracted_{DAG_ID}_{execution_date.strftime(DATE_FORMAT)}.csv')
         logging.info(f'extracted_file_path: {extracted_file_path}')
@@ -60,6 +59,9 @@ with DAG(
                                 logging.info('Exception:', e)
                 except Exception as e:
                     logging.info('Exception:', e)
+        ti = kwargs['ti']
+        ti.xcom_push(value=extracted_file_path, key='extracted_file_path')
+        ti.xcom_push(value=execution_date, key='execution_date')
 
 
     extract_task = PythonOperator(
@@ -68,36 +70,43 @@ with DAG(
         provide_context=True
     )
 
-    #
-    # def transform():
-    #     pg_hook = PostgresHook('airflow_database')
-    #     reference_df = pd.DataFrame()
-    #     transformed_df = pd.DataFrame()
-    #     extracted_df = get_extracted(EXTRACTED_FILE_PATH)
-    #     with pg_hook.get_conn() as conn:
-    #         with conn.cursor() as cursor:
-    #             try:
-    #                 cursor.execute("""SELECT "InstrumentID", "Instrument", "Ticker", "MarketplaceID"
-    #                             FROM public."Instrument";""")
-    #                 for row in cursor:
-    #                     reference_df = reference_df.append(pd.Series(row), ignore_index=True)
-    #                 if not reference_df.empty:
-    #                     transformed_df = compare_df(reference_df, extracted_df)
-    #                 else:
-    #                     transformed_df = extracted_df
-    #                 transformed_df.index = transformed_df.iloc[:, 0]
-    #                 transformed_df = transformed_df.drop([0], axis=1)
-    #                 logging.info(TRANSFORMED_FILE_PATH)
-    #                 logging.info(transformed_df)
-    #                 transformed_df.to_csv(TRANSFORMED_FILE_PATH, index_label=False, header=False, sep=';', mode='w')
-    #             except Exception as e:
-    #                 logging.info('Exception:', e)
-    #
-    #
-    # transform_task = PythonOperator(
-    #     task_id="transform_task",
-    #     python_callable=transform
-    # )
+
+    def load(**kwargs):
+        ti = kwargs['ti']
+        extracted_file_path = ti.xcom_pull(key='extracted_file_path', task_ids='extract_task')
+        execution_date = ti.xcom_pull(key='execution_date', task_ids='extract_task')
+        logging.info(f'execution_date: {execution_date.strftime(DATE_FORMAT)}')
+        logging.info(f'extracted_file_path: {extracted_file_path}')
+        extracted_df = get_extracted(extracted_file_path)
+        for idx in range(extracted_df.shape[0]):
+            instrument_id = extracted_df.iloc[idx, 0]
+            open = extracted_df.iloc[idx, 1]
+            high = extracted_df.iloc[idx, 2]
+            low  = extracted_df.iloc[idx, 3]
+            close, volume, date_time, timeframe_id, marketplace
+            pg_hook = PostgresHook('airflow_database')
+            with pg_hook.get_conn() as conn:
+                with conn.cursor() as cursor:
+                    try:
+                        sql = """IF EXISTS (SELECT "InstrumentPriceID" FROM public."InstrumentPrice"
+                                    WHERE "InstrumentID" = ? AND "DateTime" = ? AND "TimeFrameID" = ? 
+                                    AND "MarketplaceID" = ?);"""
+                        params =
+                        cursor.execute()
+                        # "InstrumentPriceID", "InstrumentID", "Open", "High", "Low", "Close", "Volume", "DateTime", "TimeFrameID"
+                        for row in cursor:
+                            reference_df = reference_df.append(pd.Series(row), ignore_index=True)
+
+                    except Exception as e:
+                        logging.info('Exception:', e)
+
+
+    load_task = PythonOperator(
+        task_id="load_task",
+        python_callable=load,
+        provide_context=True
+    )
+
     #
     # load_task = PostgresOperator(
     #     task_id='load_task',
