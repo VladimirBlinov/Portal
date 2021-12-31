@@ -5,10 +5,12 @@ import psycopg2
 from dotenv import load_dotenv
 import pandas as pd
 import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta, date
 from csv import writer
+from insrtuments_helper import list_to_csv_as_row, get_extracted
 
 load_dotenv(r'D:\Django\portal\invportal\docker\airflow\database.env')
+extracted_file_path = r'\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes\airflow_tmp\_data\price_uploader_daily_dag\extracted_price_uploader_daily_dag_20211227.csv'
 
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
@@ -23,13 +25,13 @@ def get_instruments(market=25):
     return market_instruments
 
 
-def connect_db(query, dbname=POSTGRES_DB, user_name=POSTGRES_USER, pwd=POSTGRES_PASSWORD, host=LOCAL_POSTGRES_HOST,
+def connect_db(query, params, dbname=POSTGRES_DB, user_name=POSTGRES_USER, pwd=POSTGRES_PASSWORD, host=LOCAL_POSTGRES_HOST,
                port=LOCAL_POSTGRES_PORT):
     conn = psycopg2.connect(dbname=dbname, user=user_name,
                             password=pwd, host=host, port=port)
     cursor = conn.cursor()
     try:
-        cursor.execute(query)
+        cursor.execute(query, params)
         return cursor
     except Exception as e:
         print('Exception:', e)
@@ -47,11 +49,6 @@ def get_df_from_db(query, dbname=POSTGRES_DB, user_name=POSTGRES_USER, pwd=POSTG
     except Exception as e:
         print('Exception:', e)
         conn.close()
-
-
-def get_extracted(file_path):
-    df = pd.read_csv(file_path, sep=';', header=None)
-    return df
 
 
 def compare_df(ref_df, new_df):
@@ -85,26 +82,30 @@ def get_daily_data(row, start_time, end_time):
         return instrument_id, open, high, low, close, volume, date_time, TIMEFRAME_ID, marketplace
 
 
-def list_to_csv_as_row(file_name, list_of_elem):
-    # Open file in append mode
-    with open(file_name, 'a+', newline='') as write_obj:
-        # Create a writer object from csv module
-        csv_writer = writer(write_obj)
-        # Add contents of list as last row in the csv file
-        csv_writer.writerow(list_of_elem)
-
-
 if __name__ == '__main__':
-    TIMEFRAME_ID = 7
-    start_time = datetime.datetime.now().date() - timedelta(days=1)
-    end_time = start_time + timedelta(days=1)
-    print(start_time, end_time)
-    exporter = Exporter()
-    sql = """SELECT "InstrumentID", "Instrument", "Ticker", "MarketplaceID" FROM public."Instrument";"""
-    cursor = connect_db(sql)
-    for row in cursor:
+    extracted_df = get_extracted(extracted_file_path)
+    for idx in range(extracted_df.shape[0]):
+        instrument_id, open, high, low, close, volume, date_time, timeframe_id, marketplace = extracted_df.iloc[idx, :].tolist()
+        instrument_id = int(instrument_id)
+        volume = int(volume)
+        date_time = datetime.strptime(str(int(date_time)), '%Y%m%d')
+        timeframe_id = int(timeframe_id)
+        marketplace = int(marketplace)
+
+        sql = """SELECT EXISTS (SELECT "InstrumentPriceID" FROM public."InstrumentPrice"
+                                            WHERE "InstrumentID" = %s AND "DateTime" = %s AND "TimeFrameID" = %s 
+                                            AND "MarketPlaceID" = %s);"""
+        params = (instrument_id, date_time, timeframe_id, marketplace)
         try:
-            instrument_data = get_daily_data(row, start_time, end_time)
-            print(instrument_data)
+            cursor = connect_db(sql, params)
+            id_exists = cursor.fetchone()[0]
         except Exception as e:
             logging.info('Exception:', e)
+            id_exists = None
+        print(f'{*params,}')
+        # for row in cursor:
+        #     try:
+        #         instrument_data = get_daily_data(row, start_time, end_time)
+        #         print(instrument_data)
+        #     except Exception as e:
+        #         logging.info('Exception:', e)

@@ -20,7 +20,6 @@ TEMP_DIR = '/tmp'
 WORK_DIR = os.path.join(TEMP_DIR, DAG_ID)
 if not os.path.exists(WORK_DIR):
     os.mkdir(WORK_DIR)
-TRANSFORMED_FILE_PATH = os.path.join(WORK_DIR, f'transformed_{DAG_ID}_{date.today() - timedelta(days=1)}.csv')
 DATE_FORMAT = "%Y%m%d"
 
 with DAG(
@@ -56,9 +55,9 @@ with DAG(
                                 if instrument_data:
                                     list_to_csv_as_row(extracted_file_path, instrument_data)
                             except Exception as e:
-                                logging.info('Exception:', e)
+                                logging.info(f'Exception: {e}')
                 except Exception as e:
-                    logging.info('Exception:', e)
+                    logging.info(f'Exception: {e}')
         ti = kwargs['ti']
         ti.xcom_push(value=extracted_file_path, key='extracted_file_path')
         ti.xcom_push(value=execution_date, key='execution_date')
@@ -79,26 +78,53 @@ with DAG(
         logging.info(f'extracted_file_path: {extracted_file_path}')
         extracted_df = get_extracted(extracted_file_path)
         for idx in range(extracted_df.shape[0]):
-            instrument_id = extracted_df.iloc[idx, 0]
-            open = extracted_df.iloc[idx, 1]
-            high = extracted_df.iloc[idx, 2]
-            low  = extracted_df.iloc[idx, 3]
-            close, volume, date_time, timeframe_id, marketplace
+            instrument_id, open, high, low, close, volume, date_time, timeframe_id, marketplace = extracted_df.iloc[idx,
+                                                                                                  :].tolist()
+            instrument_id = int(instrument_id)
+            volume = int(volume)
+            date_time = datetime.strptime(str(int(date_time)), DATE_FORMAT)
+            timeframe_id = int(timeframe_id)
+            marketplace = int(marketplace)
             pg_hook = PostgresHook('airflow_database')
             with pg_hook.get_conn() as conn:
                 with conn.cursor() as cursor:
+                    sql = """SELECT EXISTS (SELECT "InstrumentPriceID" FROM public."InstrumentPrice"
+                                                         WHERE "InstrumentID" = %s AND "DateTime" = %s AND "TimeFrameID" = %s 
+                                                         AND "MarketPlaceID" = %s);"""
+                    params = (instrument_id, date_time, timeframe_id, marketplace)
                     try:
-                        sql = """IF EXISTS (SELECT "InstrumentPriceID" FROM public."InstrumentPrice"
-                                    WHERE "InstrumentID" = ? AND "DateTime" = ? AND "TimeFrameID" = ? 
-                                    AND "MarketplaceID" = ?);"""
-                        params =
-                        cursor.execute()
-                        # "InstrumentPriceID", "InstrumentID", "Open", "High", "Low", "Close", "Volume", "DateTime", "TimeFrameID"
-                        for row in cursor:
-                            reference_df = reference_df.append(pd.Series(row), ignore_index=True)
-
+                        cursor.execute(sql, params)
+                        instrument_exists = cursor.fetchone()[0]
                     except Exception as e:
-                        logging.info('Exception:', e)
+                        logging.info(f'Exception: {e}')
+                        instrument_exists = None
+                    logging.info(f'{*params,} Already exist: {instrument_exists}')
+
+                    if instrument_exists:
+                        sql_update = """UPDATE public."InstrumentPrice"
+                                        SET "Open"=%s, "High"=%s, "Low"=%s, "Close"=%s, "Volume"=%s
+                                        WHERE "InstrumentID"=%s AND "DateTime"=%s AND "TimeFrameID"=%s 
+                                        AND "MarketPlaceID"=%s ;"""
+                        params_update = (open, high, low, close, volume, instrument_id, date_time,
+                                         timeframe_id, marketplace)
+                        try:
+                            cursor.execute(sql_update, params_update)
+                            logging.info(f'{*params,} updated')
+                        except Exception as e:
+                            logging.info(f'Exception: {e}')
+                    else:
+                        sql_insert = """INSERT INTO public."InstrumentPrice"(
+                            "InstrumentPriceID", "InstrumentID", "Open", "High", "Low", "Close", "Volume", "DateTime",
+                            "TimeFrameID", "MarketPlaceID")
+                            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+
+                        params_insert = (instrument_id, open, high, low, close, volume,  date_time, timeframe_id,
+                                         marketplace)
+                        try:
+                            cursor.execute(sql_insert, params_insert)
+                            logging.info(f'{*params,} inserted')
+                        except Exception as e:
+                            logging.info(f'Exception: {e}')
 
 
     load_task = PythonOperator(
@@ -107,15 +133,4 @@ with DAG(
         provide_context=True
     )
 
-    #
-    # load_task = PostgresOperator(
-    #     task_id='load_task',
-    #     postgres_conn_id='airflow_database',
-    #     sql="sql/load_instruments.sql",
-    #     # sql=f"""COPY public."Instrument" FROM '{TRANSFORMED_FILE_PATH}' DELIMITER ';'
-    #     #     """,
-    #     params={"path": TRANSFORMED_FILE_PATH}
-    # )
-
-    # extract_task >> transform_task >> load_task
-    extract_task
+    extract_task >> load_task

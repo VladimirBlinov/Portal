@@ -29,12 +29,17 @@ def get_daily_data(row, start_time, end_time):
     ticker_data = pd.DataFrame()
     instrument_id = row[0]
     marketplace = row[3]
-    exporter = Exporter()
     try:
-        ticker_data = exporter.download(instrument_id, market=Market.USA, start_date=start_time,
-                                        end_date=end_time, timeframe=Timeframe.DAILY)
+        logging.info('Trying exporter...')
+        exporter = Exporter()
+        try:
+            logging.info('Trying download...')
+            ticker_data = exporter.download(instrument_id, market=Market.USA, start_date=start_time,
+                                            end_date=end_time, timeframe=Timeframe.DAILY)
+        except Exception as e:
+            logging.info(f'Exception: {e}')
     except Exception as e:
-        logging.info('Exception:', e)
+        logging.info(f'Exception: {e}')
 
     if not ticker_data.empty:
         date_time = ticker_data.iloc[0, 0]
@@ -52,6 +57,6 @@ def list_to_csv_as_row(file_name, list_of_elem):
     # Open file in append mode
     with open(file_name, 'a+', newline='') as write_obj:
         # Create a writer object from csv module
-        csv_writer = writer(write_obj)
+        csv_writer = writer(write_obj, delimiter=';')
         # Add contents of list as last row in the csv file
         csv_writer.writerow(list_of_elem)
