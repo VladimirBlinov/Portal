@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, date
 import logging
 import os
 import pandas as pd
+import timeit
 
 from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
@@ -48,19 +49,25 @@ with DAG(
             with conn.cursor() as cursor:
                 try:
                     cursor.execute(sql)
+                    current_row = 0
+                    total_rows = cursor.rowcount
                     if cursor.rowcount > 0:
                         for row in cursor:
+                            current_row += 1
+                            logging.info(f'extracting {current_row} of {total_rows}')
                             try:
+                                start = timeit.timeit()
                                 instrument_data = get_daily_data(row, start_time, end_time)
                                 if instrument_data:
                                     list_to_csv_as_row(extracted_file_path, instrument_data)
+                                logging.info(f'execution time: {(start - timeit.timeit()):.2f}')
                             except Exception as e:
                                 logging.info(f'Exception: {e}')
                 except Exception as e:
                     logging.info(f'Exception: {e}')
         ti = kwargs['ti']
         ti.xcom_push(value=extracted_file_path, key='extracted_file_path')
-        ti.xcom_push(value=execution_date, key='execution_date')
+        ti.xcom_push(value=execution_date.strftime(DATE_FORMAT), key='execution_date')
 
 
     extract_task = PythonOperator(
@@ -74,7 +81,7 @@ with DAG(
         ti = kwargs['ti']
         extracted_file_path = ti.xcom_pull(key='extracted_file_path', task_ids='extract_task')
         execution_date = ti.xcom_pull(key='execution_date', task_ids='extract_task')
-        logging.info(f'execution_date: {execution_date.strftime(DATE_FORMAT)}')
+        logging.info(f'execution_date: {execution_date}')
         logging.info(f'extracted_file_path: {extracted_file_path}')
         extracted_df = get_extracted(extracted_file_path)
         for idx in range(extracted_df.shape[0]):
@@ -89,8 +96,8 @@ with DAG(
             with pg_hook.get_conn() as conn:
                 with conn.cursor() as cursor:
                     sql = """SELECT EXISTS (SELECT "InstrumentPriceID" FROM public."InstrumentPrice"
-                                                         WHERE "InstrumentID" = %s AND "DateTime" = %s AND "TimeFrameID" = %s 
-                                                         AND "MarketPlaceID" = %s);"""
+                                            WHERE "InstrumentID" = %s AND "DateTime" = %s AND "TimeFrameID" = %s 
+                                            AND "MarketPlaceID" = %s);"""
                     params = (instrument_id, date_time, timeframe_id, marketplace)
                     try:
                         cursor.execute(sql, params)
