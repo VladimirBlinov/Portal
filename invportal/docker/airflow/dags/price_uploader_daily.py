@@ -1,11 +1,9 @@
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import logging
 import os
-import pandas as pd
 import timeit
 
 from airflow import DAG
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.python import PythonOperator
 from airflow.hooks.postgres_hook import PostgresHook
 
@@ -60,7 +58,7 @@ with DAG(
                                 instrument_data = get_daily_data(row, start_time, end_time)
                                 if instrument_data:
                                     list_to_csv_as_row(extracted_file_path, instrument_data)
-                                logging.info(f'execution time: {(start - timeit.timeit()):.2f}')
+                                logging.info(f'execution time: {(timeit.timeit() - start):.2f}')
                             except Exception as e:
                                 logging.info(f'Exception: {e}')
                 except Exception as e:
