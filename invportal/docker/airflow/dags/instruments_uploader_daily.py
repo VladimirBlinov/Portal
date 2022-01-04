@@ -8,7 +8,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.python import PythonOperator
 from airflow.hooks.postgres_hook import PostgresHook
 
-from etlutils.insrtuments_helper import get_instruments, get_extracted, compare_df
+from etlutils.instruments_helper import get_instruments, get_extracted, compare_df
 
 DEFAULT_ARGS = {
     'owner': 'airflow',
