@@ -9,7 +9,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.python import PythonOperator
 from airflow.hooks.postgres_hook import PostgresHook
 
-from plugins.etlutils.instruments_helper import get_daily_data, list_to_csv_as_row, get_extracted
+from etlutils.instruments_helper import get_daily_data, list_to_csv_as_row, get_extracted
 
 DEFAULT_ARGS = {
     'owner': 'airflow',
