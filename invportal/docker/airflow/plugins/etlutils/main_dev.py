@@ -4,10 +4,8 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 import pandas as pd
-import datetime
 from datetime import datetime, timedelta, date
-from csv import writer
-from insrtuments_helper import list_to_csv_as_row, get_extracted
+from plugins.etlutils.insrtuments_helper import list_to_csv_as_row, get_extracted
 
 load_dotenv(r'D:\Django\portal\invportal\docker\airflow\database.env')
 extracted_file_path = r'\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes\airflow_tmp\_data\price_uploader_daily_dag\extracted_price_uploader_daily_dag_20211227.csv'
@@ -34,7 +32,7 @@ def connect_db(query, params, dbname=POSTGRES_DB, user_name=POSTGRES_USER, pwd=P
         cursor.execute(query, params)
         return cursor
     except Exception as e:
-        print('Exception:', e)
+        print(f'Exception: {e}')
         cursor.close()
         conn.close()
 
@@ -103,9 +101,4 @@ if __name__ == '__main__':
             logging.info('Exception:', e)
             id_exists = None
         print(f'{*params,}')
-        # for row in cursor:
-        #     try:
-        #         instrument_data = get_daily_data(row, start_time, end_time)
-        #         print(instrument_data)
-        #     except Exception as e:
-        #         logging.info('Exception:', e)
+
