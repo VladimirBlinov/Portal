@@ -80,4 +80,5 @@ def get_daily_data(row, start_time, end_time):
 
 
 if __name__ == '__main__':
-    pass
+    m = get_instruments()
+    print(m)
