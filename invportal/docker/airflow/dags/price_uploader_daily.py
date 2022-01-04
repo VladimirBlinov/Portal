@@ -121,9 +121,9 @@ with DAG(
                             logging.info(f'Exception: {e}')
                     else:
                         sql_insert = """INSERT INTO public."InstrumentPrice"(
-                            "InstrumentPriceID", "InstrumentID", "Open", "High", "Low", "Close", "Volume", "DateTime",
+                            "InstrumentID", "Open", "High", "Low", "Close", "Volume", "DateTime",
                             "TimeFrameID", "MarketPlaceID")
-                            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+                            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s);"""
 
                         params_insert = (instrument_id, open, high, low, close, volume,  date_time, timeframe_id,
                                          marketplace)
