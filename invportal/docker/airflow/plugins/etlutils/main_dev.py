@@ -1,11 +1,10 @@
-from finam import Exporter, Market, LookupComparator, Timeframe
+from finam import Exporter, Market, Timeframe
 import logging
 import os
 import psycopg2
 from dotenv import load_dotenv
 import pandas as pd
-from datetime import datetime, timedelta, date
-from plugins.etlutils.insrtuments_helper import list_to_csv_as_row, get_extracted
+
 
 load_dotenv(r'D:\Django\portal\invportal\docker\airflow\database.env')
 extracted_file_path = r'\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes\airflow_tmp\_data\price_uploader_daily_dag\extracted_price_uploader_daily_dag_20211227.csv'
@@ -81,24 +80,4 @@ def get_daily_data(row, start_time, end_time):
 
 
 if __name__ == '__main__':
-    extracted_df = get_extracted(extracted_file_path)
-    for idx in range(extracted_df.shape[0]):
-        instrument_id, open, high, low, close, volume, date_time, timeframe_id, marketplace = extracted_df.iloc[idx, :].tolist()
-        instrument_id = int(instrument_id)
-        volume = int(volume)
-        date_time = datetime.strptime(str(int(date_time)), '%Y%m%d')
-        timeframe_id = int(timeframe_id)
-        marketplace = int(marketplace)
-
-        sql = """SELECT EXISTS (SELECT "InstrumentPriceID" FROM public."InstrumentPrice"
-                                            WHERE "InstrumentID" = %s AND "DateTime" = %s AND "TimeFrameID" = %s 
-                                            AND "MarketPlaceID" = %s);"""
-        params = (instrument_id, date_time, timeframe_id, marketplace)
-        try:
-            cursor = connect_db(sql, params)
-            id_exists = cursor.fetchone()[0]
-        except Exception as e:
-            logging.info('Exception:', e)
-            id_exists = None
-        print(f'{*params,}')
-
+    pass
