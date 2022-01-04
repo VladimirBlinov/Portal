@@ -84,54 +84,57 @@ with DAG(
         logging.info(f'execution_date: {execution_date}')
         logging.info(f'extracted_file_path: {extracted_file_path}')
         extracted_df = get_extracted(extracted_file_path)
-        for idx in range(extracted_df.shape[0]):
-            instrument_id, open, high, low, close, volume, date_time, timeframe_id, marketplace = extracted_df.iloc[idx,
-                                                                                                  :].tolist()
-            instrument_id = int(instrument_id)
-            volume = int(volume)
-            date_time = datetime.strptime(str(int(date_time)), DATE_FORMAT)
-            timeframe_id = int(timeframe_id)
-            marketplace = int(marketplace)
-            pg_hook = PostgresHook('airflow_database')
-            with pg_hook.get_conn() as conn:
-                with conn.cursor() as cursor:
-                    sql = """SELECT EXISTS (SELECT "InstrumentPriceID" FROM public."InstrumentPrice"
-                                            WHERE "InstrumentID" = %s AND "DateTime" = %s AND "TimeFrameID" = %s 
-                                            AND "MarketPlaceID" = %s);"""
-                    params = (instrument_id, date_time, timeframe_id, marketplace)
-                    try:
-                        cursor.execute(sql, params)
-                        instrument_exists = cursor.fetchone()[0]
-                    except Exception as e:
-                        logging.info(f'Exception: {e}')
-                        instrument_exists = None
-                    logging.info(f'{*params,} Already exist: {instrument_exists}')
-
-                    if instrument_exists:
-                        sql_update = """UPDATE public."InstrumentPrice"
-                                        SET "Open"=%s, "High"=%s, "Low"=%s, "Close"=%s, "Volume"=%s
-                                        WHERE "InstrumentID"=%s AND "DateTime"=%s AND "TimeFrameID"=%s 
-                                        AND "MarketPlaceID"=%s ;"""
-                        params_update = (open, high, low, close, volume, instrument_id, date_time,
-                                         timeframe_id, marketplace)
+        if extracted_df:
+            for idx in range(extracted_df.shape[0]):
+                instrument_id, open, high, low, close, volume, date_time, timeframe_id, marketplace = extracted_df.iloc[idx,
+                                                                                                      :].tolist()
+                instrument_id = int(instrument_id)
+                volume = int(volume)
+                date_time = datetime.strptime(str(int(date_time)), DATE_FORMAT)
+                timeframe_id = int(timeframe_id)
+                marketplace = int(marketplace)
+                pg_hook = PostgresHook('airflow_database')
+                with pg_hook.get_conn() as conn:
+                    with conn.cursor() as cursor:
+                        sql = """SELECT EXISTS (SELECT "InstrumentPriceID" FROM public."InstrumentPrice"
+                                                WHERE "InstrumentID" = %s AND "DateTime" = %s AND "TimeFrameID" = %s 
+                                                AND "MarketPlaceID" = %s);"""
+                        params = (instrument_id, date_time, timeframe_id, marketplace)
                         try:
-                            cursor.execute(sql_update, params_update)
-                            logging.info(f'{*params,} updated')
+                            cursor.execute(sql, params)
+                            instrument_exists = cursor.fetchone()[0]
                         except Exception as e:
                             logging.info(f'Exception: {e}')
-                    else:
-                        sql_insert = """INSERT INTO public."InstrumentPrice"(
-                            "InstrumentID", "Open", "High", "Low", "Close", "Volume", "DateTime",
-                            "TimeFrameID", "MarketPlaceID")
-                            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+                            instrument_exists = None
+                        logging.info(f'{*params,} Already exist: {instrument_exists}')
 
-                        params_insert = (instrument_id, open, high, low, close, volume,  date_time, timeframe_id,
-                                         marketplace)
-                        try:
-                            cursor.execute(sql_insert, params_insert)
-                            logging.info(f'{*params,} inserted')
-                        except Exception as e:
-                            logging.info(f'Exception: {e}')
+                        if instrument_exists:
+                            sql_update = """UPDATE public."InstrumentPrice"
+                                            SET "Open"=%s, "High"=%s, "Low"=%s, "Close"=%s, "Volume"=%s
+                                            WHERE "InstrumentID"=%s AND "DateTime"=%s AND "TimeFrameID"=%s 
+                                            AND "MarketPlaceID"=%s ;"""
+                            params_update = (open, high, low, close, volume, instrument_id, date_time,
+                                             timeframe_id, marketplace)
+                            try:
+                                cursor.execute(sql_update, params_update)
+                                logging.info(f'{*params,} updated')
+                            except Exception as e:
+                                logging.info(f'Exception: {e}')
+                        else:
+                            sql_insert = """INSERT INTO public."InstrumentPrice"(
+                                "InstrumentID", "Open", "High", "Low", "Close", "Volume", "DateTime",
+                                "TimeFrameID", "MarketPlaceID")
+                                VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s);"""
+
+                            params_insert = (instrument_id, open, high, low, close, volume,  date_time, timeframe_id,
+                                             marketplace)
+                            try:
+                                cursor.execute(sql_insert, params_insert)
+                                logging.info(f'{*params,} inserted')
+                            except Exception as e:
+                                logging.info(f'Exception: {e}')
+        else:
+            logging.info('Extracted file is empty')
 
 
     load_task = PythonOperator(

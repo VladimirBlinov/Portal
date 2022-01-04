@@ -11,8 +11,13 @@ def get_instruments(market=25):
 
 
 def get_extracted(file_path):
-    df = pd.read_csv(file_path, sep=';', header=None)
-    return df
+    try:
+        df = pd.read_csv(file_path, sep=';', header=None)
+        return df
+    except Exception as e:
+        logging.info('Exception:', e)
+        return None
+
 
 
 def compare_df(ref_df, new_df):
