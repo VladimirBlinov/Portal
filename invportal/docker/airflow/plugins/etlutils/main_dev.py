@@ -4,7 +4,7 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 import pandas as pd
-from instruments_helper import get_daily_data, list_to_csv_as_row, get_extracted
+
 
 
 load_dotenv(r'D:\Django\portal\invportal\docker\airflow\database.env')
@@ -81,6 +81,4 @@ def get_daily_data(row, start_time, end_time):
 
 
 if __name__ == '__main__':
-    extracted_df = get_extracted(extracted_file_path)
-    if extracted_df:
-        print(extracted_df)
+    pass
