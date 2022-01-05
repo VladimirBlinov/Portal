@@ -82,7 +82,7 @@ with DAG(
         logging.info(f'execution_date: {execution_date}')
         logging.info(f'extracted_file_path: {extracted_file_path}')
         extracted_df = get_extracted(extracted_file_path)
-        if extracted_df:
+        if not extracted_df.empty:
             for idx in range(extracted_df.shape[0]):
                 instrument_id, open, high, low, close, volume, date_time, timeframe_id, marketplace = extracted_df.iloc[idx,
                                                                                                       :].tolist()

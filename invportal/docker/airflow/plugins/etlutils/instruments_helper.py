@@ -16,8 +16,7 @@ def get_extracted(file_path):
         return df
     except Exception as e:
         logging.info('Exception:', e)
-        return None
-
+        return pd.DataFrame()
 
 
 def compare_df(ref_df, new_df):
