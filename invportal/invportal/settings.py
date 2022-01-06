@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'psycopg2'
+    'psycopg2',
+    'mortgage.apps.MortgageConfig'
 ]
 
 MIDDLEWARE = [
@@ -80,7 +81,8 @@ DATABASES = {
         'NAME': 'invportal',
         "USER": 'admin',
         "PASSWORD": 'admin',
-        "HOST": 'postgresdb',
+        "HOST": '62.109.30.107',  # server host
+        # "HOST": 'postgresdb',
         "PORT": 5432,
     }
 }
