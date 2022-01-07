@@ -2,10 +2,8 @@ from finam import Exporter, Market, Timeframe
 import logging
 import os
 import psycopg2
-from dotenv import load_dotenv
 import pandas as pd
-
-
+from dotenv import load_dotenv
 
 load_dotenv(r'D:\Django\portal\invportal\docker\airflow\database.env')
 extracted_file_path = r'\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes\airflow_tmp\_data\price_uploader_daily_dag\extracted_price_uploader_daily_dag_20211227.csv'

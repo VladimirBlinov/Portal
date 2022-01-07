@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
+
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8pp#j9f%ho&p&+!3qn(5=0iy^&hgu2@age@iefi#2rvem!u6ed'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -78,12 +83,12 @@ WSGI_APPLICATION = 'invportal.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'invportal',
-        "USER": 'admin',
-        "PASSWORD": 'admin',
-        "HOST": '62.109.30.107',  # server host
+        'NAME': env('DJANGO_POSTGRES_NAME'),
+        "USER": env('DJANGO_POSTGRES_USER'),
+        "PASSWORD": env('DJANGO_POSTGRES_PASSWORD'),
+        "HOST": env('DJANGO_POSTGRES_SERVER_HOST_IP'),
         # "HOST": 'postgresdb',
-        "PORT": 5432,
+        "PORT": env('DJANGO_POSTGRES_SERVER_PORT'),
     }
 }
 
