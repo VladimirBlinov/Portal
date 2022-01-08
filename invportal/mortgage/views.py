@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+
+menu = ['Mortgage calculator', 'Stocks price prediction', 'Stocks price patterns']
 
 
 def index(request):
-    return HttpResponse("mortgage page")
+    return render(request, "mortgage/index.html", {'menu': menu, 'title': 'Mortgage calculator'})
