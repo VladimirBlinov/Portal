@@ -1,2 +1,1 @@
-invportal/docker/airflow/.env
-invportal/docker/airflow/database.env
+docker/postgres/db-data/
