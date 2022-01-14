@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import environ
+import os
 
 # Initialise environment variables
 env = environ.Env()
@@ -43,7 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'psycopg2',
-    'mortgage.apps.MortgageConfig'
+    'mortgage.apps.MortgageConfig',
+    'main.apps.MainConfig'
 ]
 
 MIDDLEWARE = [
@@ -61,7 +63,7 @@ ROOT_URLCONF = 'invportal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [(os.path.join(BASE_DIR, 'templates')),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
