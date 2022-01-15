@@ -9,12 +9,14 @@
     <div class="container py-3">
   <header>
     <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
+        <a href="{% url 'home' %}" class="d-flex align-items-center text-dark text-decoration-none">
         <span class="fs-4">InvPortal</span>
+      </a>
 
       {% block mainmenu %}
       <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
           {% for m in menu %}
-            <a class="me-3 py-2 text-dark text-decoration-none" href="#">{{m}}</a>
+            <a class="me-3 py-2 text-dark text-decoration-none" href="{% url m.url_name %}">{{ m.title }}</a>
           {% endfor %}
       </nav>
       {% endblock mainmenu %}

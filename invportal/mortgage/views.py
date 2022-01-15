@@ -1,7 +1,14 @@
 from django.shortcuts import render
 
-menu = ['Mortgage calculator', 'Stocks price prediction', 'Stocks price patterns']
+menu = [{'title': 'Mortgage calculator', 'url_name': 'mortgage'},
+        {'title': 'Stocks price prediction', 'url_name': 'stock_price_prediction'},
+        {'title': 'Stocks price patterns', 'url_name': 'stock_price_patterns'}
+        ]
 
 
 def index(request):
-    return render(request, "mortgage/index.html", {'menu': menu, 'title': 'Mortgage calculator'})
+    context = {
+        'menu': menu,
+        'title': 'Mortgage calculator'
+    }
+    return render(request, "mortgage/index.html",  context=context)

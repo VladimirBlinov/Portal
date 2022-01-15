@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'psycopg2',
     'mortgage.apps.MortgageConfig',
-    'main.apps.MainConfig'
+    'main.apps.MainConfig',
+    'stock_price_prediction.apps.StockPricePredictionConfig',
+    'stock_price_patterns.apps.StockPricePatternsConfig'
 ]
 
 MIDDLEWARE = [
