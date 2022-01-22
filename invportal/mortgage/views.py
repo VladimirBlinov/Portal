@@ -13,10 +13,6 @@ def index(request):
         print(form.data)
         if form.is_valid():
             print(form.cleaned_data)
-        # else:
-        #     print(form.data)
-        # print(form.errors)
-
     else:
         form = MortgageBaseForm()
 

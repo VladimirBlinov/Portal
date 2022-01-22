@@ -15,30 +15,15 @@
         <form class="needs-validation" action="{% url 'mortgage' %}" method="post">
           {% csrf_token %}
           <div class="row g-3">
-
-            <div class="col-md-6">
-              <label for="{{ form.price_mn.auto_id }}" class="form-label" req ="{{ form.price_mn.required }}">{{ form.price_mn.label }}</label>
-              {{ form.price_mn }}
-              <small class="text-muted">{{ form.price_mn.help_text }}</small>
-            </div>
-
-            <div class="col-md-6">
-              <label for="{{ form.initial_payment_mn.auto_id }}" class="form-label">{{ form.initial_payment_mn.label }}</label>
-              {{ form.initial_payment_mn }}
-              <small class="text-muted">Amount in millions of RUB<br>Example: 2.5 (2.5 mn RUB)</small>
-            </div>
-
-            <div class="col-md-6">
-              <label for="{{ form.period.auto_id }}" class="form-label">{{ form.period.label }}</label>
-              {{ form.period }}
-              <small class="text-muted">Years of mortgage<br>Example: 30 (30 years)</small>
-            </div>
-
-            <div class="col-md-6">
-              <label for="{{ form.loan_rate_pct.auto_id }}" class="form-label">{{ form.loan_rate_pct.label }}</label>
-              {{ form.loan_rate_pct }}
-              <small class="text-muted">Loan rate in %<br>Example: 7.5 (7.5%)</small>
-            </div>
+            {% for field in form %}
+              {% if field.field.required %}
+                <div class="col-md-6">
+                  <label for="{{ field.auto_id }}" class="form-label" >{{ field.label }}</label>
+                  {{ field }}
+                  <small class="text-muted">{{ field.help_text }}</small>
+                </div>
+              {% endif %}
+            {% endfor %}
           </div>
 
           <hr class="my-4">
@@ -50,38 +35,55 @@
           <br>
 
           <div class="row g-3">
-            <div class="col-md-6">
-              <label for="{{ form.first_month.auto_id }}" class="form-label">{{ form.first_month.label }}</label>
-              {{ form.first_month }}
-              <small class="text-muted">I will start regular early payments from this month<br>Example: 24 (from 24th month)</small>
-              {% if form.first_month.errors %}
-              {% for error in form.first_month.errors %}
-                  <div class="alert alert-danger" role="alert">{{ error }}</div>
-              {% endfor %}
+            {% for field in form %}
+              {% if not field.field.required %}
+                {% if field.name != 'early_payment' %}
+                  <div class="col-md-6">
+                    <label for="{{ field.auto_id }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    <small class="text-muted">{{ field.help_text }}</small>
+                    {% if field.errors %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger" role="alert">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                  </div>
+                {% endif %}
               {% endif %}
-            </div>
+            {% endfor %}
 
-            <div class="col-md-6">
-              <label for="{{ form.frequency.auto_id }}" class="form-label">{{ form.frequency.label }}</label>
-              {{ form.frequency }}
-              <small class="text-muted">I will make early payments every ..th month<br>Example: 1 (every month);<br>6 (every half of the year)</small>
-              {% if form.frequency.errors %}
-              {% for error in form.frequency.errors %}
-                  <div class="alert alert-danger" role="alert">{{ error }}</div>
-              {% endfor %}
-              {% endif %}
-            </div>
+<!--            <div class="col-md-6">-->
+<!--              <label for="{{ form.first_month.auto_id }}" class="form-label">{{ form.first_month.label }}</label>-->
+<!--              {{ form.first_month }}-->
+<!--              <small class="text-muted">{{ form.first_month.help_text }}</small>-->
+<!--              {% if form.first_month.errors %}-->
+<!--              {% for error in form.first_month.errors %}-->
+<!--                  <div class="alert alert-danger" role="alert">{{ error }}</div>-->
+<!--              {% endfor %}-->
+<!--              {% endif %}-->
+<!--            </div>-->
 
-            <div class="col-12">
-              <label for="{{ form.early_pay_amount.auto_id }}" class="form-label">{{ form.early_pay_amount.label }}</label>
-              {{ form.early_pay_amount }}
-              <small class="text-muted">Amount of periodical early payment<br>Example: 50000 (50000 RUB)</small>
-              {% if form.early_pay_amount.errors %}
-              {% for error in form.early_pay_amount.errors %}
-                  <div class="alert alert-danger" role="alert">{{ error }}</div>
-              {% endfor %}
-              {% endif %}
-            </div>
+<!--            <div class="col-md-6">-->
+<!--              <label for="{{ form.frequency.auto_id }}" class="form-label">{{ form.frequency.label }}</label>-->
+<!--              {{ form.frequency }}-->
+<!--              <small class="text-muted">I will make early payments every ..th month<br>Example: 1 (every month);<br>6 (every half of the year)</small>-->
+<!--              {% if form.frequency.errors %}-->
+<!--              {% for error in form.frequency.errors %}-->
+<!--                  <div class="alert alert-danger" role="alert">{{ error }}</div>-->
+<!--              {% endfor %}-->
+<!--              {% endif %}-->
+<!--            </div>-->
+
+<!--            <div class="col-12">-->
+<!--              <label for="{{ form.early_pay_amount.auto_id }}" class="form-label">{{ form.early_pay_amount.label }}</label>-->
+<!--              {{ form.early_pay_amount }}-->
+<!--              <small class="text-muted">Amount of periodical early payment<br>Example: 50000 (50000 RUB)</small>-->
+<!--              {% if form.early_pay_amount.errors %}-->
+<!--              {% for error in form.early_pay_amount.errors %}-->
+<!--                  <div class="alert alert-danger" role="alert">{{ error }}</div>-->
+<!--              {% endfor %}-->
+<!--              {% endif %}-->
+<!--            </div>-->
 
           </div>
 
