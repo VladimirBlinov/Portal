@@ -1,12 +1,9 @@
 {% extends 'default.html' %}
-
 {% block content %}
 <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
       <h1 class="display-4 fw-normal">{{ title }}</h1>
       <p class="fs-5 text-muted">Here you can calculate mortgage parameters.<br>Just enter your initial conditions.</p>
 </div>
-
-
 
     <div class="row g-3">
       <div class="col-md-3 col-lg-3">
@@ -15,79 +12,75 @@
       </div>
 
       <div class="col-md-3 col-lg-6">
-        <form class="needs-validation" novalidate="">
+        <form class="needs-validation" action="{% url 'mortgage' %}" method="post">
+          {% csrf_token %}
           <div class="row g-3">
 
             <div class="col-md-6">
-              <label for="price_mn" class="form-label">House price</label>
-              <input type="text" class="form-control" id="price_mn" placeholder="mn RUB" required="">
-              <small class="text-muted">Price in millions of RUB<br>Example: 20 (20 mn RUB)</small>
-              <div class="invalid-feedback">
-                House price is required
-              </div>
+              <label for="{{ form.price_mn.auto_id }}" class="form-label" req ="{{ form.price_mn.required }}">{{ form.price_mn.label }}</label>
+              {{ form.price_mn }}
+              <small class="text-muted">{{ form.price_mn.help_text }}</small>
             </div>
 
             <div class="col-md-6">
-              <label for="initial_payment_mn" class="form-label">Initial payment</label>
-              <input type="text" class="form-control" id="initial_payment_mn" placeholder="mn RUB" required="">
+              <label for="{{ form.initial_payment_mn.auto_id }}" class="form-label">{{ form.initial_payment_mn.label }}</label>
+              {{ form.initial_payment_mn }}
               <small class="text-muted">Amount in millions of RUB<br>Example: 2.5 (2.5 mn RUB)</small>
-              <div class="invalid-feedback">
-                Initial payment is required
-              </div>
             </div>
 
             <div class="col-md-6">
-              <label for="period" class="form-label">Mortgage period</label>
-              <input type="text" class="form-control" id="period" placeholder="years" required="">
+              <label for="{{ form.period.auto_id }}" class="form-label">{{ form.period.label }}</label>
+              {{ form.period }}
               <small class="text-muted">Years of mortgage<br>Example: 30 (30 years)</small>
-              <div class="invalid-feedback">
-                Period is required
-              </div>
             </div>
 
             <div class="col-md-6">
-              <label for="loan_rate_pct" class="form-label">Loan rate</label>
-              <input type="text" class="form-control" id="loan_rate_pct" placeholder="%" required="">
+              <label for="{{ form.loan_rate_pct.auto_id }}" class="form-label">{{ form.loan_rate_pct.label }}</label>
+              {{ form.loan_rate_pct }}
               <small class="text-muted">Loan rate in %<br>Example: 7.5 (7.5%)</small>
-              <div class="invalid-feedback">
-                Loan rate is required
-              </div>
             </div>
           </div>
 
           <hr class="my-4">
 
           <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="early_payment">
-          <label class="form-check-label" for="early_payment">Are you going to make early payments periodically?</label>
+            {{ form.early_payment }}
+          <label class="form-check-label" for="{{ form.early_payment.auto_id }}">{{ form.early_payment.label }}</label>
           </div>
           <br>
+
           <div class="row g-3">
             <div class="col-md-6">
-              <label for="first_month" class="form-label">First month</label>
-              <input type="text" class="form-control" id="first_month" placeholder="" >
+              <label for="{{ form.first_month.auto_id }}" class="form-label">{{ form.first_month.label }}</label>
+              {{ form.first_month }}
               <small class="text-muted">I will start regular early payments from this month<br>Example: 24 (from 24th month)</small>
-              <div class="invalid-feedback">
-                First month is required if early payments option selected
-              </div>
+              {% if form.first_month.errors %}
+              {% for error in form.first_month.errors %}
+                  <div class="alert alert-danger" role="alert">{{ error }}</div>
+              {% endfor %}
+              {% endif %}
             </div>
 
             <div class="col-md-6">
-              <label for="frequency" class="form-label">Frequency</label>
-              <input type="text" class="form-control" id="frequency" placeholder="" >
+              <label for="{{ form.frequency.auto_id }}" class="form-label">{{ form.frequency.label }}</label>
+              {{ form.frequency }}
               <small class="text-muted">I will make early payments every ..th month<br>Example: 1 (every month);<br>6 (every half of the year)</small>
-              <div class="invalid-feedback">
-                Frequency is required if early payments option selected
-              </div>
+              {% if form.frequency.errors %}
+              {% for error in form.frequency.errors %}
+                  <div class="alert alert-danger" role="alert">{{ error }}</div>
+              {% endfor %}
+              {% endif %}
             </div>
 
             <div class="col-12">
-              <label for="early_pay_amount" class="form-label">Early payment amount</label>
-              <input type="text" class="form-control" id="early_pay_amount" placeholder="RUB">
+              <label for="{{ form.early_pay_amount.auto_id }}" class="form-label">{{ form.early_pay_amount.label }}</label>
+              {{ form.early_pay_amount }}
               <small class="text-muted">Amount of periodical early payment<br>Example: 50000 (50000 RUB)</small>
-              <div class="invalid-feedback">
-                Early payment amount is required if early payments option selected
-              </div>
+              {% if form.early_pay_amount.errors %}
+              {% for error in form.early_pay_amount.errors %}
+                  <div class="alert alert-danger" role="alert">{{ error }}</div>
+              {% endfor %}
+              {% endif %}
             </div>
 
           </div>
@@ -99,6 +92,5 @@
       </div>
 
     </div>
-
 
 {% endblock %}
