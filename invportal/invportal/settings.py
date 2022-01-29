@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'mortgage.apps.MortgageConfig',
     'main.apps.MainConfig',
     'stock_price_prediction.apps.StockPricePredictionConfig',
-    'stock_price_patterns.apps.StockPricePatternsConfig'
+    'stock_price_patterns.apps.StockPricePatternsConfig',
+    'lib'
 ]
 
 MIDDLEWARE = [
@@ -65,7 +66,7 @@ ROOT_URLCONF = 'invportal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [(os.path.join(BASE_DIR, 'templates')),],
+        'DIRS': [(os.path.join(BASE_DIR, 'templates')), (os.path.join(BASE_DIR, 'lib/templatetags'))],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -1,3 +1,5 @@
+{% load tags %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +17,7 @@
 
       {% block mainmenu %}
       <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
+          {% get_menu as menu %}
           {% for m in menu %}
             <a class="me-3 py-2 text-dark text-decoration-none" href="{% url m.url_name %}">{{ m.title }}</a>
           {% endfor %}
