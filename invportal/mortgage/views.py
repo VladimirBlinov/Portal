@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from requests import post
+
 from mortgage.forms import MortgageBaseForm
 
 
@@ -16,3 +18,8 @@ def index(request):
         'form': form
     }
     return render(request, "mortgage/index.html",  context=context)
+
+
+def calendar(request, form):
+    url = 'http://127.0.0.1:5005'
+    response = post(url, data=form.cleaned_data)

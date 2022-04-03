@@ -12,7 +12,7 @@
       </div>
 
       <div class="col-md-3 col-lg-6">
-        <form class="needs-validation" action="{% url 'mortgage' %}" method="post">
+        <form class="needs-validation" action="{% url 'calendar' %}" method="post">
           {% csrf_token %}
           <div class="row g-3">
             {% for field in form %}
