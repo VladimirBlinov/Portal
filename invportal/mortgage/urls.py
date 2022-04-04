@@ -5,5 +5,5 @@ from mortgage import views
 
 urlpatterns = [
     path('', views.index, name='mortgage'),
-    path('/calendar', views.calendar, name='calendar'),
+    path('calendar', views.calendar, name='calendar'),
 ]

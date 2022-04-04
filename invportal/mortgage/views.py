@@ -20,6 +20,8 @@ def index(request):
     return render(request, "mortgage/index.html",  context=context)
 
 
-def calendar(request, form):
+def calendar(request):
     url = 'http://127.0.0.1:5005'
-    response = post(url, data=form.cleaned_data)
+    data = request.POST
+    print(data)
+    response = post(url, data=data)
