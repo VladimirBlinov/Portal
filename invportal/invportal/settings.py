@@ -91,7 +91,7 @@ DATABASES = {
         'NAME': env('DJANGO_POSTGRES_NAME'),
         "USER": env('DJANGO_POSTGRES_USER'),
         "PASSWORD": env('DJANGO_POSTGRES_PASSWORD'),
-        "HOST": env('DJANGO_POSTGRES_SERVER_HOST_IP'),
+        "HOST": env('DJANGO_POSTGRES_SERVER_HOST'),
         "PORT": env('DJANGO_POSTGRES_SERVER_PORT'),
     }
 }

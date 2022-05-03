@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render
 from requests import post
 
@@ -23,5 +25,14 @@ def index(request):
 def calendar(request):
     url = 'http://127.0.0.1:5005'
     data = request.POST
-    print(data)
     response = post(url, data=data)
+    response_data = json.loads(response.text)
+    header = response_data[list(response_data.keys())[0]].keys()
+    print(header)
+    context = {
+        'title': 'Mortgage calculator',
+        'data': response_data,
+        'header': header
+    }
+    print(context['data']['1'])
+    return render(request, "mortgage/calendar.html", context=context)

@@ -3,19 +3,19 @@ from django.utils.safestring import mark_safe
 
 
 class MortgageBaseForm(forms.Form):
-    price_mn = forms.FloatField(min_value=0.1,
-                                label='House price',
-                                required=True,
-                                help_text=mark_safe('Price in millions of RUB<br />Example: 20 (20 mn RUB)'),
-                                widget=forms.TextInput(attrs={'class': 'form-control',
-                                                              'placeholder': 'mn RUB'}))
+    price = forms.FloatField(min_value=0.1,
+                             label='House price',
+                             required=True,
+                             help_text=mark_safe('Price in millions of RUB<br />Example: 20 (20 mn RUB)'),
+                             widget=forms.TextInput(attrs={'class': 'form-control',
+                                                           'placeholder': 'mn RUB'}))
 
-    initial_payment_mn = forms.FloatField(min_value=0.1,
-                                          label='Initial payment',
-                                          required=True,
-                                          help_text=mark_safe('Years of mortgage<br />Example: 30 (30 years)'),
-                                          widget=forms.TextInput(attrs={'class': 'form-control',
-                                                                        'placeholder': 'mn RUB'}))
+    initial_payment = forms.FloatField(min_value=0.1,
+                                       label='Initial payment',
+                                       required=True,
+                                       help_text=mark_safe('Years of mortgage<br />Example: 30 (30 years)'),
+                                       widget=forms.TextInput(attrs={'class': 'form-control',
+                                                                     'placeholder': 'mn RUB'}))
 
     period = forms.FloatField(min_value=1,
                               label='Mortgage period',
@@ -24,12 +24,12 @@ class MortgageBaseForm(forms.Form):
                               widget=forms.TextInput(attrs={'class': 'form-control',
                                                             'placeholder': 'years'}))
 
-    loan_rate_pct = forms.FloatField(min_value=0.01,
-                                     label='Loan rate',
-                                     required=True,
-                                     help_text=mark_safe('Loan rate in %<br>Example: 7.5 (7.5%)'),
-                                     widget=forms.TextInput(attrs={'class': 'form-control',
-                                                                   'placeholder': '%'}))
+    loan_rate = forms.FloatField(min_value=0.01,
+                                 label='Loan rate',
+                                 required=True,
+                                 help_text=mark_safe('Loan rate in %<br>Example: 7.5 (7.5%)'),
+                                 widget=forms.TextInput(attrs={'class': 'form-control',
+                                                               'placeholder': '%'}))
 
     early_payment = forms.BooleanField(label='Are you going to make early payments periodically?',
                                        required=False,

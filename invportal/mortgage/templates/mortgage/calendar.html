@@ -1,0 +1,35 @@
+{% extends 'default.html' %}
+{% block content %}
+<div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+      <h1 class="display-4 fw-normal">{{ title }}</h1>
+      <p class="fs-5 text-muted">Your payments calendar</p>
+</div>
+
+<div class="table-responsive">
+<table class="table table-striped table-sm">
+  <thead>
+    <tr>
+      <th scope="col">Month</th>
+      <th scope="col" style="text-align: center">Percent part</th>
+      <th scope="col" style="text-align: center">Main part</th>
+      <th scope="col" style="text-align: center">Monthly payment</th>
+      <th scope="col" style="text-align: center">Residual loan</th>
+<!--      {% for header in header %}-->
+<!--        <th scope="col"> {{ header }}</th>-->
+<!--      {% endfor %}-->
+    </tr>
+  </thead>
+  <tbody>
+    {% for month, month_values in data.items %}
+    <tr>
+      <td>{{ month }}</td>
+      {% for k, v in month_values.items %}
+        <td style="text-align: center"> {{ v }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% endblock %}
