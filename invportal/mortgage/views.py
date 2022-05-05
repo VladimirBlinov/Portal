@@ -28,11 +28,12 @@ def calendar(request):
     response = post(url, data=data)
     response_data = json.loads(response.text)
     header = response_data[list(response_data.keys())[0]].keys()
-    print(header)
+    chart = response_data.pop('chart', None)
     context = {
         'title': 'Mortgage calculator',
         'data': response_data,
-        'header': header
+        'header': header,
+        'chart': chart
     }
     print(context['data']['1'])
     return render(request, "mortgage/calendar.html", context=context)
