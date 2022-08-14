@@ -20,6 +20,11 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./:/usr/src/app
+    networks:
+      - default
+      - mortgage_network
+    external_links:
+      - mortgage-backend-flask
     depends_on:
       - postgresdb
     ports:
@@ -39,3 +44,8 @@ services:
 
 volumes:
   db-data:
+
+networks:
+  mortgage_network:
+    name: mortgage_network
+    external: true

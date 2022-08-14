@@ -13,14 +13,14 @@ class MortgageBaseForm(forms.Form):
     initial_payment = forms.FloatField(min_value=0.1,
                                        label='Initial payment',
                                        required=True,
-                                       help_text=mark_safe('Years of mortgage<br />Example: 30 (30 years)'),
+                                       help_text=mark_safe('Amount in millions of RUB<br />Example: 2.5 (2.5 mn RUB)'),
                                        widget=forms.TextInput(attrs={'class': 'form-control',
                                                                      'placeholder': 'mn RUB'}))
 
     period = forms.FloatField(min_value=1,
                               label='Mortgage period',
                               required=True,
-                              help_text=mark_safe('Amount in millions of RUB<br />Example: 2.5 (2.5 mn RUB)'),
+                              help_text=mark_safe('Years of mortgage<br />Example: 30 (30 years)'),
                               widget=forms.TextInput(attrs={'class': 'form-control',
                                                             'placeholder': 'years'}))
 

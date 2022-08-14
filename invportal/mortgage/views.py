@@ -23,7 +23,7 @@ def index(request):
 
 
 def calendar(request):
-    url = 'http://127.0.0.1:5005'
+    url = 'http://mortgage-backend-flask:5005'
     data = request.POST
     response = post(url, data=data)
     response_data = json.loads(response.text)
