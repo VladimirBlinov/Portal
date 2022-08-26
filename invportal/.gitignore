@@ -1,2 +1,3 @@
 docker/postgres/db-data/
 ../.idea/
+./invportal/.env
